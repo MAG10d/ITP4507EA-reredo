@@ -1,0 +1,46 @@
+@startuml
+
+abstract class CandyBar {
+    + {abstract} toString(): String
+}
+
+class KitKat {
+    + toString(): String
+}
+
+class Snickers {
+    + toString(): String
+}
+
+abstract class CandyBarFactory {
+    + {abstract} createCandyBar(): CandyBar
+}
+
+class KitKatFactory {
+    + createCandyBar(): CandyBar
+}
+
+class SnickersFactory {
+    + createCandyBar(): CandyBar
+}
+
+class CandyBarBin {
+    - factory: CandyBarFactory
+    - candyBars: Vector
+    - LowStockLevel: int
+    + CandyBarBin(factory: CandyBarFactory)
+    + restock(): void
+    + add(cb: CandyBar): void
+    + getAmountInStock(): int
+    + toString(): String
+}
+
+' 只使用箭頭符號來表示繼承關係，不使用 extends 關鍵字
+CandyBarFactory <|-- KitKatFactory
+CandyBarFactory <|-- SnickersFactory
+CandyBar <|-- KitKat
+CandyBar <|-- Snickers
+CandyBarBin "1" *-- "0..*" CandyBar
+CandyBarBin o-- CandyBarFactory
+
+@enduml
