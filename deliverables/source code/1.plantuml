@@ -1,0 +1,166 @@
+@startuml
+
+abstract class Menu {
+  - {static} single_instance: Menu
+  # price: int
+  # availableCount: int
+  # {final} CODE: String
+  + Menu()
+  + {abstract} editMenu(Scanner): void
+  + {abstract} createLunchSet(): LunchSet
+}
+
+class ChineseMenu {
+  # mainDish: String
+  # soup: String
+  + ChineseMenu()
+  + editMenu(Scanner): void
+  + createLunchSet(): ChineseLunchSet
+  + toString(): String
+}
+
+class WesternMenu {
+  # mainDish: String
+  # soup: String
+  + WesternMenu()
+  + editMenu(Scanner): void
+  + createLunchSet(): WesternLunchSet
+  + toString(): String
+}
+
+abstract class LunchSet {
+  # menu: Menu
+  + LunchSet()
+  + getMenu(): Menu
+  + {abstract} placeOrder(Scanner): void
+}
+
+class ChineseLunchSet {
+  # menu: ChineseMenu
+  # drink: String
+  # soup: String
+  + ChineseLunchSet()
+  + placeOrder(Scanner): void
+  + toString(): String
+  + orderDetails(): String
+  + getMenu(): ChineseMenu
+}
+
+class WesternLunchSet {
+  # menu: WesternMenu
+  # sideDish: String
+  # drink: String
+  # soup: String
+  + WesternLunchSet()
+  + placeOrder(Scanner): void
+  + toString(): String
+  + orderDetails(): String
+  + getMenu(): WesternMenu
+}
+
+class Order {
+  # lunchset: LunchSet
+  # staffNumber: String
+  # officeLocation: String
+  + place(Scanner): void
+}
+
+class MenuFactory {
+  + {static} chineseMenu: ChineseMenu
+  + {static} westernMenu: WesternMenu
+  - {static} menus: Menu[]
+  + MenuFactory()
+  + {static} getMenu(Scanner): Menu
+  + {static} getMenu(String): Menu
+  + {static} getMenus(): Menu[]
+}
+
+interface CommandFactory {
+  + execute(): void
+  + undo(): void
+}
+
+class Controller {
+  - {static} sc: Scanner
+  - {static} outstandingOrders: ArrayList<Order>
+  - {static} completedOrders: ArrayList<Order>
+  - {static} commands: ArrayList<CommandFactory>
+  + {static} main(String[]): void
+  - {static} executeCommand(CommandFactory): void
+}
+
+class EditMenuCommand {
+  - sc: Scanner
+  + EditMenuCommand(Scanner)
+  + execute(): void
+  + undo(): void
+}
+
+class ShowMenuCommand {
+  - sc: Scanner
+  + ShowMenuCommand(Scanner)
+  + execute(): void
+  + undo(): void
+}
+
+class ListOrderCommand {
+  - sc: Scanner
+  - outstandingOrders: ArrayList<Order>
+  + ListOrderCommand(Scanner, ArrayList)
+  + execute(): void
+  + undo(): void
+}
+
+class PlaceOrderCommand {
+  - sc: Scanner
+  - orders: ArrayList<Order>
+  + PlaceOrderCommand(Scanner, ArrayList)
+  + execute(): void
+  + undo(): void
+}
+
+class CancelOrderCommand {
+  - sc: Scanner
+  - orders: ArrayList<Order>
+  + CancelOrderCommand(Scanner)
+  + execute(): void
+  + undo(): void
+}
+
+class CompleteOrderCommand {
+  - sc: Scanner
+  - outstandingOrders: ArrayList<Order>
+  - completedOrders: ArrayList<Order>
+  + CompleteOrderCommand(Scanner, ArrayList, ArrayList)
+  + execute(): void
+  + undo(): void
+}
+
+Menu <|-- ChineseMenu
+Menu <|-- WesternMenu
+LunchSet <|-- ChineseLunchSet
+LunchSet <|-- WesternLunchSet
+CommandFactory <|.. EditMenuCommand
+CommandFactory <|.. ShowMenuCommand
+CommandFactory <|.. ListOrderCommand
+CommandFactory <|.. PlaceOrderCommand
+CommandFactory <|.. CancelOrderCommand
+CommandFactory <|.. CompleteOrderCommand
+
+Order o-- LunchSet
+ChineseLunchSet o-- ChineseMenu
+WesternLunchSet o-- WesternMenu
+Controller o-- CommandFactory
+MenuFactory -- Menu
+Controller o-- Order
+LunchSet o-- Menu
+Controller o-- MenuFactory
+EditMenuCommand -- MenuFactory
+PlaceOrderCommand -- MenuFactory
+ShowMenuCommand -- MenuFactory
+CancelOrderCommand -- Order
+CompleteOrderCommand -- Order
+ListOrderCommand -- Order
+PlaceOrderCommand -- Order
+
+@enduml
