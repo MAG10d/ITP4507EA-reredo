@@ -1,3 +1,5 @@
+package model;
+
 import java.util.Vector;
 
 public class Player {
@@ -36,6 +38,12 @@ public class Player {
     }
 
     public void showPlayerDetails() {
-        // Display player's details
+        System.out.println("Player ID: " + playerID);
+        System.out.println("Player Name: " + playerName);
+        System.out.println("Heroes:");
+        for (Hero hero : heros) {
+            hero.showHeroStatus();
+            System.out.println();
+        }
     }
 }

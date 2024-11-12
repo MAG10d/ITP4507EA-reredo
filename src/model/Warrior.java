@@ -1,3 +1,5 @@
+package model;
+
 public class Warrior extends Hero {
     private int defencePoint;
 
@@ -15,11 +17,16 @@ public class Warrior extends Hero {
 
     @Override
     public void callSkill() {
-        // Implement Warrior's skill
+        System.out.println("Warrior " + getHeroName() + " uses Charge!");
     }
 
     @Override
     public void showHeroStatus() {
-        // Display Warrior's status
+        System.out.println("Warrior Status:");
+        System.out.println("ID: " + getHeroID());
+        System.out.println("Name: " + getHeroName());
+        System.out.println("HP: " + getHp());
+        System.out.println("Damage: " + getDamage());
+        System.out.println("Defence Point: " + defencePoint);
     }
 }
