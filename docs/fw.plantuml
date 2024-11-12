@@ -66,61 +66,9 @@ package "factory" {
         + createHero(heroID: String, heroName: String): Hero
     }
 
-    ' Command 工廠相關
-    abstract class CommandFactory {
-        + {abstract} createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class CreatePlayerCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class SetCurrentPlayerCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class AddHeroCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class DeleteHeroCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class CallHeroSkillCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class ShowPlayerCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class DisplayAllPlayersCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class ChangePlayerNameCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class UndoCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class RedoCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class ListUndoRedoCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class ExitSystemCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
-    }
-
-    class SelectPlayerCommandFactory {
-        + createCommand(receiver: Receiver, params: Object[]): Command
+    ' 简化 Command 工厂
+    class CommandFactory {
+        + createCommand(commandType: String, receiver: Receiver, params: Object[]): Command
     }
 }
 
@@ -128,78 +76,54 @@ package "factory" {
 HeroFactory <|-- WarriorFactory
 HeroFactory <|-- WarlockFactory
 
-CommandFactory <|-- CreatePlayerCommandFactory
-CommandFactory <|-- SetCurrentPlayerCommandFactory
-CommandFactory <|-- AddHeroCommandFactory
-CommandFactory <|-- DeleteHeroCommandFactory
-CommandFactory <|-- CallHeroSkillCommandFactory
-CommandFactory <|-- ShowPlayerCommandFactory
-CommandFactory <|-- DisplayAllPlayersCommandFactory
-CommandFactory <|-- ChangePlayerNameCommandFactory
-CommandFactory <|-- UndoCommandFactory
-CommandFactory <|-- RedoCommandFactory
-CommandFactory <|-- ListUndoRedoCommandFactory
-CommandFactory <|-- ExitSystemCommandFactory
-CommandFactory <|-- SelectPlayerCommandFactory
-
-' System 關係更新
-GameSystem o--> HeroFactory
-GameSystem o--> CommandFactory
-
 package "command" {
-    interface Command {
+    abstract class Command {
+        + execute(): void
+        + undo(): void 
+    }
+
+    ' Example of improved command classes
+    class CreatePlayerCommand implements Command {
+        - receiver: Receiver
+        - playerID: String
+        - playerName: String
+        - createdPlayer: Player 
+        - playerMemento: Memento 
         + execute(): void
         + undo(): void
     }
 
-    class Receiver {
-        - players: Map<String, Player>
-        - currentPlayer: Player
-        - heroFactory: HeroFactory
-        
-        ' 業務邏輯方法
-        + createPlayer(playerID: String, playerName: String): void
-        + setCurrentPlayer(playerID: String): void
-        + addHero(heroType: String, heroID: String, heroName: String): void
-        + deleteHero(heroID: String): void
-        + callHeroSkill(heroID: String): void
-        + showPlayer(): void
-        + displayAllPlayers(): void
-        + changePlayerName(newName: String): void
-        + selectPlayer(playerID: String): void
-        + listUndoRedo(): void
-        + exitSystem(): void
-    }
-
-    ' 1. c = create player
-    class CreatePlayerCommand {
+    class ChangePlayerNameCommand implements Command {
         - receiver: Receiver
         - playerID: String
-        - playerName: String
+        - newName: String
+        - oldName: String      
+        - playerMemento: Memento
+        + execute(): void
+        + undo(): void
+    }
+
+    class AddHeroCommand implements Command {
+        - receiver: Receiver
+        - heroType: String
+        - heroID: String
+        - heroName: String
+        - addedHero: Hero      
+        - playerMemento: Memento
         + execute(): void
         + undo(): void
     }
 
     ' 2. g = set current player
-    class SetCurrentPlayerCommand {
+    class SetCurrentPlayerCommand implements Command {
         - receiver: Receiver
         - playerID: String
         + execute(): void
         + undo(): void
     }
 
-    ' 3. a = add hero
-    class AddHeroCommand {
-        - receiver: Receiver
-        - heroType: String
-        - heroID: String
-        - heroName: String
-        + execute(): void
-        + undo(): void
-    }
-
     ' 4. d = delete hero
-    class DeleteHeroCommand {
+    class DeleteHeroCommand implements Command {
         - receiver: Receiver
         - heroID: String
         + execute(): void
@@ -207,7 +131,7 @@ package "command" {
     }
 
     ' 5. m = call hero skill
-    class CallHeroSkillCommand {
+    class CallHeroSkillCommand implements Command {
         - receiver: Receiver
         - heroID: String
         + execute(): void
@@ -215,21 +139,21 @@ package "command" {
     }
 
     ' 6. s = show player
-    class ShowPlayerCommand {
+    class ShowPlayerCommand implements Command {
         - receiver: Receiver
         + execute(): void
-        + undo(): void
+        ' 不需要实现 undo
     }
 
     ' 7. p = display all players
-    class DisplayAllPlayersCommand {
+    class DisplayAllPlayersCommand implements Command {
         - receiver: Receiver
         + execute(): void
-        + undo(): void
+        ' 不需要实现 undo
     }
 
     ' 8. t = change player's name
-    class ChangePlayerNameCommand {
+    class ChangePlayerNameCommand implements Command {
         - receiver: Receiver
         - newName: String
         + execute(): void
@@ -237,35 +161,35 @@ package "command" {
     }
 
     ' 9. u = undo
-    class UndoCommand {
+    class UndoCommand implements Command {
         - receiver: Receiver
         + execute(): void
         + undo(): void
     }
 
     ' 10. r = redo
-    class RedoCommand {
+    class RedoCommand implements Command {
         - receiver: Receiver
         + execute(): void
         + undo(): void
     }
 
     ' 11. l = list undo/redo
-    class ListUndoRedoCommand {
+    class ListUndoRedoCommand implements Command {
         - receiver: Receiver
         + execute(): void
-        + undo(): void
+        ' 不需要实现 undo
     }
 
     ' 12. x = exit system
-    class ExitSystemCommand {
+    class ExitSystemCommand implements Command {
         - receiver: Receiver
         + execute(): void
-        + undo(): void
+        ' 不需要实现 undo
     }
 
     ' 13. Select player by ID
-    class SelectPlayerCommand {
+    class SelectPlayerCommand implements Command {
         - receiver: Receiver
         - playerID: String
         + execute(): void
@@ -273,20 +197,6 @@ package "command" {
     }
 }
 
-' Command 關係
-Command <|.. CreatePlayerCommand
-Command <|.. SetCurrentPlayerCommand
-Command <|.. AddHeroCommand
-Command <|.. DeleteHeroCommand
-Command <|.. CallHeroSkillCommand
-Command <|.. ShowPlayerCommand
-Command <|.. DisplayAllPlayersCommand
-Command <|.. ChangePlayerNameCommand
-Command <|.. UndoCommand
-Command <|.. RedoCommand
-Command <|.. ListUndoRedoCommand
-Command <|.. ExitSystemCommand
-Command <|.. SelectPlayerCommand
 
 CreatePlayerCommand --> Receiver
 SetCurrentPlayerCommand --> Receiver
@@ -340,8 +250,8 @@ package "system" {
     class CommandInvoker {
         - undoStack: Stack<Command>
         - redoStack: Stack<Command>
+        - careTaker: CareTaker
         - maxUndoLevels: int
-        - currentCommandCount: int
         
         + executeCommand(command: Command): void
         + undo(): void
@@ -362,10 +272,6 @@ Hero <|-- Warrior
 Hero <|-- Warlock
 Player "1" *-- "0..*" Hero
 
-' Factory 關係
-HeroFactory <|-- WarriorFactory
-HeroFactory <|-- WarlockFactory
-
 ' Memento 關係
 CareTaker "1" o--> "0..*" Memento
 Memento "1" --> "1" Originator
@@ -375,7 +281,18 @@ Player --|> Originator
 ' System 關係
 GameSystem o--> HeroFactory
 GameSystem "1" *-- "0..*" Player
-GameSystem o--> Receiver
 GameSystem o--> CommandInvoker
+GameSystem o--> CommandFactory
+GameSystem o--> Receiver  
+
+' Command Pattern 关系
+CommandInvoker o--> Command
+Command --> Receiver
+Receiver o--> HeroFactory
+
+' Add relationships
+CommandInvoker --> CareTaker
+Command --> Memento
+Command --> CareTaker
 
 @enduml
